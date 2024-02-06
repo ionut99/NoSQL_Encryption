@@ -5,42 +5,10 @@ const cors = require("cors")
 
 const {encrypt, decrypt, getSecret, setSecret} = require('./utils/custom_crypto')
 
+const User = require('./models/UserSchema')
+const Book = require('./models/BookSchema')
+
 ///
-const mongoose = require('mongoose');
-
-// MongoDB connection
-const mongoDBUri = 'mongodb://localhost:27017'; // Replace with your MongoDB URI
-mongoose.connect(mongoDBUri);
-
-const db = mongoose.connection;
-db.on('error', console.error.bind(console, 'MongoDB connection error:'));
-
-// User schema
-const Schema = mongoose.Schema;
-
-// User Schema
-const UserSchema = new Schema({
-    name: { type: String, required: true },
-    email: { type: String, required: true, unique: true },
-    password: { type: String, required: true }
-});
-
-// Book Schema
-const BookSchema = new Schema({
-    title: { type: String, required: true },
-    author: { type: String, required: true, unique: true },
-    year: { type: String, required: true },
-});
-
-
-// User model
-const User = mongoose.model('User', UserSchema);
-///
-
-// User model
-const Book = mongoose.model('Book', BookSchema);
-///
-
 
 const app = express()
 app.use(express.json())
@@ -136,11 +104,11 @@ app.post('/register', async (req, res) => {
         });
         */
 
-        //getSecret("KVT-MESSAGE").catch((error) => console.log("Error:", error));
+        getSecret("KVT-MESSAGE").catch((error) => console.log("Error:", error));
 
         //setSecret("FirstSecretFromApp", "FirstSecretValue");
 
-        const user = await addNewUser(req.body);
+        //const user = await addNewUser(req.body);
         console.log('Added user:', user);
         res.status(201).json({ message: "User successfully registered", user: user });
     } catch (error) {
@@ -167,6 +135,30 @@ app.post('/submit', async (req, res) => {
         } else {
             res.status(500).json({ message: 'Internal server error' }); // Other errors
         }
+    }
+});
+
+// book search 
+app.get('/booksearch', async (req, res) => {
+    try {
+      
+        const { query } = req.query;  
+        //
+        const results = await Book.find({
+        $or: [
+            { title: { $regex: query, $options: 'i' } },
+            { author: { $regex: query, $options: 'i' } },
+            { year: { $regex: query, $options: 'i' } }
+        ]
+        });
+        //
+        res.json(results);
+        //
+    } catch (error) {
+        //
+        console.error('Search error:', error);
+        //
+        res.status(500).send('Error performing search');
     }
 });
 
