@@ -22,14 +22,12 @@ function Search() {
         params: { query }
       });
 
-      console.log(response.data);
       setResults(response.data); // Assuming the API returns an array of results
     } catch (error) {
       console.error('Error fetching search results:', error);
       setResults([]); // Reset results on error
     }
   };
-
 
   //
   const handleSubmit = (event) => {
@@ -53,8 +51,8 @@ function Search() {
         <div className='resultBox'>
             {results.length > 0 ? (
                 <ul>
-                    {results.map((result) => (
-                        <li key={result.id}>
+                    {results.map((result, index) => (
+                        <li key={index}>
                             <h3>{result.title}</h3>
                             <p>Author: {result.author}</p>
                             <p>Year: {result.year}</p>
